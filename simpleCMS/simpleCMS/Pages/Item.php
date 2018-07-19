@@ -1,6 +1,6 @@
 <?php
 
-namespace simpleCMS
+namespace simpleCMS\Pages
 {
     /**
      * An abstract class that is the basis for various widgets

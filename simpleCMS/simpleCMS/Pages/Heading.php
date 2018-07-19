@@ -1,6 +1,6 @@
 <?php
 
-namespace simpleCMS
+namespace simpleCMS\Pages
 {
 	/**
      * Holds the heading information for a page
@@ -19,11 +19,13 @@ namespace simpleCMS
         public $type = null;
 
 
-        function __construct($index, $type=1, $content="")
+        function __construct($index, $type, $content)
         {
             $this->index = $index;
-            $this->type = $type;
-            $this->content = $content;
+
+            $this->type = htmlentities($type);
+
+            $this->content = htmlentities($content);
         }
 
         /**
@@ -32,7 +34,7 @@ namespace simpleCMS
          */
         public function getIndex()
         {
-            return $this->getIndex;
+            return $this->index;
         }
 
         /**

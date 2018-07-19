@@ -8,6 +8,7 @@
     <OutputType>Library</OutputType>
     <ProjectTypeGuids>{A0786B88-2ADB-4C21-ABE8-AA2D79766269}</ProjectTypeGuids>
     <RuntimeVersion>7.1</RuntimeVersion>
+    <Runtime>PHP</Runtime>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <IncludeDebugInformation>true</IncludeDebugInformation>
@@ -16,13 +17,26 @@
     <IncludeDebugInformation>false</IncludeDebugInformation>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="simpleCMS\Heading.php" />
-    <Compile Include="simpleCMS\Item.php" />
-    <Compile Include="simpleCMS\Page.php" />
+    <Compile Include="dbTemp.php" />
+    <Compile Include="simpleCMS\DB\DBHelper.php" />
+    <Compile Include="simpleCMS\DB\DBInfo.php" />
+    <Compile Include="simpleCMS\Edit\delPage.php" />
+    <Compile Include="simpleCMS\Edit\edit.php" />
+    <Compile Include="simpleCMS\Edit\retrieveData.php" />
+    <Compile Include="simpleCMS\Edit\savePage.php" />
+    <Compile Include="simpleCMS\Pages\Heading.php" />
+    <Compile Include="simpleCMS\Pages\Item.php" />
+    <Compile Include="simpleCMS\Pages\Page.php" />
     <Compile Include="index.php" />
-    <Compile Include="simpleCMS\Paragraph.php" />
+    <Compile Include="simpleCMS\Pages\Section.php" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="simpleCMS\" />
+    <Folder Include="simpleCMS\DB\" />
+    <Folder Include="simpleCMS\Edit\" />
+    <Folder Include="simpleCMS\Pages\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="simpleCMS\Edit\edit.js" />
   </ItemGroup>
 </Project>
