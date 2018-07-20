@@ -7,7 +7,6 @@ namespace simpleCMS\DB
 	/**
 	 * Uses mysqli to interact with a MySQL database
 	 *
-	 * DBHelper description.
 	 *
 	 * @version 1.0
 	 * @author Liam
@@ -44,7 +43,7 @@ namespace simpleCMS\DB
                 pageId INT NOT NULL,
                 itemIndex INT NOT NULL,
                 content VARCHAR(5000) NOT NULL
-            )"; 
+            )";
             $this->query($query);
 
             // Create the Image Table
@@ -64,6 +63,13 @@ namespace simpleCMS\DB
                 itemIndex INT NOT NULL,
                 content VARCHAR(20) NOT NULL,
                 headingType INT NOT NULL
+            )";
+            $this->query($query);
+
+            // Create the Heading Table
+            $query = "CREATE TABLE IF NOT EXISTS User (
+                name VARCHAR(15) NOT NULL UNIQUE,
+                password VARCHAR(300) NOT NULL
             )";
             $this->query($query);
         }
@@ -119,7 +125,7 @@ namespace simpleCMS\DB
             $result = $stmt->get_result();
 
             // Set the results to our return variable
-            if ($result->num_rows > 1)
+            if ($result->num_rows > 0)
             {
                 $returns = $result->fetch_assoc();
             }
@@ -152,6 +158,32 @@ namespace simpleCMS\DB
             }
 
             // Return any entries that we get
+            return $returns;
+        }
+        function selectUser($username)
+        {
+            // Prepare a statement
+            $stmt = $this->prepare("SELECT * FROM User WHERE name=?");
+            $stmt->bind_param("s",$username);
+
+            // Execute the statement
+            $returns = $stmt->execute();
+
+            // Get the result
+            $result = $stmt->get_result();
+            
+            // Ensure there were rows returned
+            if ($result->num_rows > 0)
+            {
+                // get the first row
+            	$returns = $result->fetch_assoc();
+            }
+            else
+            {
+                // Set returns to be false
+                $returns = false;
+            }
+
             return $returns;
         }
 

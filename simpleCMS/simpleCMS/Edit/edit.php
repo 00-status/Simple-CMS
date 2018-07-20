@@ -1,5 +1,13 @@
 <?php
 
+session_start();
+
+if ($_SESSION["validated"] != true)
+{
+	die("Invalid Credentials");
+}
+
+
 ?>
 
 <!DOCTYPE html>

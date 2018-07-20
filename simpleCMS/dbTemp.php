@@ -11,6 +11,10 @@ spl_autoload_register(function($class)
 $inf = new DBInfo();
 $db = new DBHelper($inf->host(),$inf->username(),$inf->pass(),$inf->dbName(),$inf->port());
 
-$db->insertData();
+$pass = password_hash("simplePass", PASSWORD_DEFAULT);
+$stmt = $db->prepare("INSERT INTO User (name, password) VALUES ('admin', ?)");
+$stmt->bind_param("s", $pass);
 
+$stmt->execute();
+echo "Result: " + $result;
 ?>

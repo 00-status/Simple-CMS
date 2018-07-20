@@ -20,11 +20,6 @@ namespace simpleCMS\Pages
 	 */
 	class Page
 	{
-        /**
-         * The number of items on the current page
-         * @var mixed
-         */
-        public $itemCount;
 
         public $title = null;
 
@@ -45,11 +40,6 @@ namespace simpleCMS\Pages
             // Get the specified page from the db
             $this->getPage($pageId);
 
-        }
-
-        public function setTitle($content)
-        {
-            $this->title->content = $content;
         }
 
         /**
