@@ -11,10 +11,11 @@ spl_autoload_register(function($class)
 $inf = new DBInfo();
 $db = new DBHelper($inf->host(),$inf->username(),$inf->pass(),$inf->dbName(),$inf->port());
 
-$pass = password_hash("simplePass", PASSWORD_DEFAULT);
-$stmt = $db->prepare("INSERT INTO User (name, password) VALUES ('admin', ?)");
-$stmt->bind_param("s", $pass);
+$db->selectItems("Section\\",1);
 
-$stmt->execute();
+$db->close();
+$db = null;
+
+
 echo "Result: " + $result;
 ?>

@@ -1,4 +1,5 @@
 <?php
+session_start();
 
 // Specify the header
 header('Content-type: application/json');
@@ -10,6 +11,13 @@ spl_autoload_register(function($class)
 {
     require_once "..\\..\\" . $class .'.php';
 });
+
+// Check if the requester is authorized
+if ($_SESSION["validated"] != true)
+{
+	die(array("error" => "unauthorized"));
+}
+
 
 
 $contentType = null;

@@ -7,9 +7,6 @@ namespace simpleCMS\DB
 	/**
 	 * Uses mysqli to interact with a MySQL database
 	 *
-	 *
-	 * @version 1.0
-	 * @author Liam
 	 */
 	class DBHelper extends mysqli
 	{
@@ -19,6 +16,9 @@ namespace simpleCMS\DB
             parent::__construct($host, $username, $password, $dbname, $port);
 
             // Check the connection
+            if ($this->connect_error) {
+                die("Connection failed: " . $this->onnect_error);
+            }
 
             // Create all of the tables in the DB if they do not exist
             $this->createTables();
@@ -66,7 +66,7 @@ namespace simpleCMS\DB
             )";
             $this->query($query);
 
-            // Create the Heading Table
+            // Create the User Table
             $query = "CREATE TABLE IF NOT EXISTS User (
                 name VARCHAR(15) NOT NULL UNIQUE,
                 password VARCHAR(300) NOT NULL
@@ -109,36 +109,51 @@ namespace simpleCMS\DB
             // Return the results
             return $returns;
         }
+        /**
+         * Attempts to select a page from the DB based on the given pageId
+         * If a page is not found, then returns false.
+         * @param mixed $pageId
+         * @return \array|boolean
+         */
         public function selectPage($pageId)
         {
-            // Assume the select failed
-            $returns = false;
-
             // Prepare a SQL statement
             $stmt = $this->prepare("SELECT * FROM Page WHERE pageId=?");
-            $stmt->bind_param("i", $pageId);
+            $returns = $stmt->bind_param("i", $pageId);
 
             // Execute the SQL statement
-            $stmt->execute();
+            $returns = $stmt->execute();
 
-            // Get the results
-            $result = $stmt->get_result();
-
-            // Set the results to our return variable
-            if ($result->num_rows > 0)
+            if ($returns != false)
             {
-                $returns = $result->fetch_assoc();
+                // Get the results
+                $result = $stmt->get_result();
+
+                // Set the results to our return variable
+                if ($result->num_rows > 0)
+                {
+                    $returns = $result->fetch_assoc();
+                }
             }
 
             // Return either false or the row found
             return $returns;
         }
+        /**
+         * Selects all items with the given pageId from a given table
+         * If no items are found, then returns false.
+         * @param mixed $table
+         * @param mixed $pageId
+         * @return \array|boolean
+         */
         public function selectItems($table, $pageId)
         {
             // Assume that there are no entries that correspond to the given page
             $returns = false;
             // An empty array for any entries that are returned later
             $rows = array();
+
+            $table = $this->real_escape_string($table);
 
             // Grab the base Items for the page from PageItem
             $query = "SELECT * FROM $table WHERE pageId='$pageId'";
@@ -160,30 +175,36 @@ namespace simpleCMS\DB
             // Return any entries that we get
             return $returns;
         }
+        /**
+         * Selects a user from the DB based on a given username
+         * If no user is found, then returns false.
+         * @param mixed $username
+         * @return \array|boolean
+         */
         function selectUser($username)
         {
             // Prepare a statement
             $stmt = $this->prepare("SELECT * FROM User WHERE name=?");
-            $stmt->bind_param("s",$username);
+            $returns = $stmt->bind_param("s",$username);
 
-            // Execute the statement
-            $returns = $stmt->execute();
-
-            // Get the result
-            $result = $stmt->get_result();
-            
-            // Ensure there were rows returned
-            if ($result->num_rows > 0)
+            if ($returns)
             {
-                // get the first row
-            	$returns = $result->fetch_assoc();
-            }
-            else
-            {
-                // Set returns to be false
-                $returns = false;
-            }
+                // Execute the statement
+                $returns = $stmt->execute();
 
+                if ($returns)
+                {
+                    // Get the result
+                    $result = $stmt->get_result();
+
+                    // Ensure there were rows returned
+                    if ($result->num_rows > 0)
+                    {
+                        // get the first row
+                        $returns = $result->fetch_assoc();
+                    }
+                }
+            }
             return $returns;
         }
 
@@ -191,85 +212,150 @@ namespace simpleCMS\DB
 
 
         // INSERT AND UPDATE
+        /**
+         * Updates a section in the DB. Returns whether or not the statement succeeded
+         * @param mixed $pageId The page the section belongs to
+         * @param mixed $itemIndex The index of the section
+         * @param mixed $content The contents of the section
+         * @param mixed $sectionId The if for the section
+         * @return boolean
+         */
         function updateSection($pageId, $itemIndex, $content, $sectionId)
         {
-            $result = false;
-
+            // Prepare an update statement
             $stmt = $this->prepare(
                 "UPDATE `Section` SET `pageId`=?,`itemIndex`=?,`content`=?
                     WHERE `sectionId`=?");
 
-            $stmt->bind_param("iisi", $pageId, $itemIndex, $content, $sectionId);
+            // Bind parameters to the statement
+            $result = $stmt->bind_param("iisi", $pageId, $itemIndex, $content, $sectionId);
+            // Execute the statement
+            if ($result)
+            {
+                $result = $stmt->execute();
+            }
 
-
-            $result = $stmt->execute();
-
+            // Returns whether or not the statement succeeded
             return $result;
         }
+        /**
+         * Attempts to update a headig in the DB. Returns whether or not the statement succeeded.
+         * @param mixed $pageId The page the heading belongs to
+         * @param mixed $itemIndex the index for the heading
+         * @param mixed $content the contents of the heading
+         * @param mixed $headingType the type of the heading (h1, h2, h3, etc)
+         * @param mixed $headingId The id for the heading
+         * @return boolean
+         */
         function updateHeading($pageId, $itemIndex, $content, $headingType, $headingId)
         {
-            $result = false;
-
+            // Prepare an update statement
             $stmt = $this->prepare(
                 "UPDATE `Heading` SET `pageId`=?,`itemIndex`=?,`content`=?,`headingType`=?
                     WHERE `headingId`=?");
 
-            $stmt->bind_param("iisii", $pageId, $itemIndex, $content, $headingType, $headingId);
-
-
-            $result = $stmt->execute();
+            // Bind the parameters
+            $result = $stmt->bind_param("iisii", $pageId, $itemIndex, $content, $headingType, $headingId);
+            // execute the statement
+            if ($result)
+            {
+                $result = $stmt->execute();
+            }
 
             return $result;
         }
-
+        /**
+         * Attempts to insert a new Section into the DB. Returns whether or not the statement succeeded.
+         * @param mixed $pageId The page the Section belongs to
+         * @param mixed $itemIndex the index for the Section
+         * @param mixed $content the contents of the Section
+         * @return boolean
+         */
         function insertSection($pageId, $itemIndex, $content)
         {
-            $result = false;
-
+            // Prepare an insert statement
             $stmt = $this->prepare("INSERT INTO Section (pageId, itemIndex, content) VALUES (?,?,?)");
-            $stmt->bind_param("iis", $pageId, $itemIndex, $content);
+            $result = $stmt->bind_param("iis", $pageId, $itemIndex, $content);
 
-            $result = $stmt->execute();
+            // Execute the statement
+            if ($result)
+            {
+                $result = $stmt->execute();
+            }
 
             return $result;
         }
+        /**
+         * Attempts to insert a new heading. Returns whether or not the statement succeeded.
+         * @param mixed $pageId The page the heading belongs to
+         * @param mixed $itemIndex the index of the heading
+         * @param mixed $content the contents of the heading
+         * @param mixed $headingType the heading type (h1,h2,h3)
+         * @return boolean
+         */
         function insertHeading($pageId, $itemIndex, $content, $headingType)
         {
             $result = false;
 
             $stmt = $this->prepare("INSERT INTO Heading (pageId, itemIndex, content, headingType) VALUES (?,?,?,?)");
-            $stmt->bind_param("iisi", $pageId, $itemIndex, $content, $headingType);
+            $result = $stmt->bind_param("iisi", $pageId, $itemIndex, $content, $headingType);
 
-            $result = $stmt->execute();
+            // Execute the statement
+            if ($result)
+            {
+                $result = $stmt->execute();
+            }
 
+            // Return whether or not the statement succeeded
             return $result;
         }
 
 
 
         // DELETE
+        /**
+         * Attempts to delete a heading in the db
+         * @param mixed $itemId The id of the heading to be deleted
+         * @return boolean
+         */
         function deleteHeading($itemId)
         {
             $result = false;
 
+            // prepare a statement
             $stmt = $this->prepare("DELETE FROM Heading WHERE headingId = ?");
-            $stmt->bind_param("i", $itemId);
+            $result = $stmt->bind_param("i", $itemId);
 
-            $result = $stmt->execute();
+            // execute the statement
+            if ($result)
+            {
+                $result = $stmt->execute();
+            }
 
+            // Return whether or not the statement succeeded.
             return $result;
         }
+        /**
+         * Attempts to delete a Section in the db
+         * @param mixed $itemId the id of the section
+         * @return boolean
+         */
         function deleteSection($itemId)
         {
-            $result = false;
-
+            // Prepare a statment
             $stmt = $this->prepare("DELETE FROM Section WHERE sectionId = ?");
-            $stmt->bind_param("i", $itemId);
+            $result = $stmt->bind_param("i", $itemId);
 
-            $result = $stmt->execute();
+            // Execute the statement
+            if ($result)
+            {
+                $result = $stmt->execute();
+            }
 
+            // Return whether or not the statement succeeded
             return $result;
         }
+
 
 
 

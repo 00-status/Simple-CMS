@@ -1,7 +1,91 @@
 <?php
+session_start();
+
+use simpleCMS\DB\DBHelper;
+use simpleCMS\DB\DBInfo;
+
+spl_autoload_register(function($class)
+{
+    require_once '..\\..\\' . $class . '.php';
+});
+
+// If the user is already validated, then send them to the edit page
+if ($_SESSION["validated"] == true)
+{
+	header("location: ..\\Edit\\edit.php");
+}
 
 
+// Variable to track if the user input is valid or not
+// Assumed to be valid until proven invalid
+$validated = true;
+$errorMessage = <<<ET
 
+            <div class="ui form error">
+                <div class="ui error message">
+                    <div class="header">Invalid Credentials</div>
+                    <p>The username or password entered is incorrect.</p>
+                </div>
+            </div>
+ET;
+
+
+// Login Stuff
+if ($_SERVER['REQUEST_METHOD'] === 'POST')
+{
+    // Input Validation
+    $username = trim($_POST['user']);
+    $password = trim($_POST['pass']);
+
+    // Check if either the username or password is empty
+    if (empty($username) || empty($password))
+    {
+        $validated = false;
+    }
+
+
+    // Validate the username
+    if (strlen($username) < 3 || strlen($username) > 15)
+    {
+        $validated = false;
+    }
+    // Validate the password
+    if (strlen($password) < 8 || strlen($password) > 30)
+    {
+        $validated = false;
+    }
+
+    if ($validated === true)
+    {
+        // Check if the user exists in the DB
+        $inf = new DBInfo();
+        $db = new DBHelper($inf->host(),$inf->username(),$inf->pass(),$inf->dbName(),$inf->port());
+
+        // Attempt to get the user from the DB
+        $user = $db->selectUser($username);
+        // Close the DB
+        $db->close();
+        $db = null;
+
+        // If the user was not found
+        if ($user === false)
+        {
+            $validated = false;
+        }
+        else if ($user['name'] === $username && password_verify($password, $user["password"]))
+        {
+            // Set Session Cookie
+            $_SESSION["validated"] = true;
+            // Redirect to the edit page
+            header("Location: ..\\Edit\\edit.php");
+            die();
+        }
+        else
+        {
+            $validated = false;
+        }
+    }
+}
 ?>
 
 
@@ -21,7 +105,8 @@
     <div class="ui menu"></div>
 
     <div class="ui raised padded text container segment">
-        <form class="ui form" action="validate.php" method="post">
+        <form class="ui form" action="#" method="post">
+            <?php if ($validated != true) { echo $errorMessage; } ?>
             <div class="field">
                 <label>Username</label>
                 <input type="text" name="user" placeholder="Username"

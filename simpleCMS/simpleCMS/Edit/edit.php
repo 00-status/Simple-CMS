@@ -1,12 +1,11 @@
 <?php
-
 session_start();
 
 if ($_SESSION["validated"] != true)
 {
+    header("location: ..\\Login\\login.php");
 	die("Invalid Credentials");
 }
-
 
 ?>
 

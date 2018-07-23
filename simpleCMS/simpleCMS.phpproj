@@ -25,7 +25,6 @@
     <Compile Include="simpleCMS\Edit\retrieveData.php" />
     <Compile Include="simpleCMS\Edit\savePage.php" />
     <Compile Include="simpleCMS\Login\login.php" />
-    <Compile Include="simpleCMS\Login\validate.php" />
     <Compile Include="simpleCMS\Pages\Heading.php" />
     <Compile Include="simpleCMS\Pages\Item.php" />
     <Compile Include="simpleCMS\Pages\Page.php" />

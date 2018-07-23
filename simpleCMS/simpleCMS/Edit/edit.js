@@ -10,10 +10,10 @@ getPages();
 function getPages()
 {
     var data = { data: "pages" };
-    // var url = "retrieveData.php";
 
     fetch(retrieveUrl, {
         method: "post",
+        credentials: 'include',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
     })
