@@ -159,8 +159,7 @@ function deleteItem(event)
     index = index.split("-");
     index = parseInt(index[1]);
 
-    console.log(items[index]["sectionId"]);
-    console.log(items[index]["headingId"]);
+   
 
     if (typeof items[index]["sectionId"] !== 'undefined' || typeof items[index]["headingId"] !== 'undefined' )
     {
@@ -198,7 +197,6 @@ function addHeading()
 
     // Add the new item to the end of the items array
     items.push(newItem);
-    console.log(items[items.length - 1]["itemIndex"]);
 
     // Display the new item
     displayItems();
@@ -222,6 +220,14 @@ function saveItemContent(event)
     
     // Set the content of the changed item
     items[index]["content"] = $("#" + itemId).val();
+}
+function saveHeadingType(event)
+{
+    var itemId = event.target.id;
+    var index = itemId.split("-");
+    index = parseInt(index[1]);
+
+    items[index]["headingType"] = $("#" + itemId).val();
 }
 
 
@@ -257,12 +263,55 @@ function displayItems()
 
         if (items[i]['itemType'] == "Heading")
         {
+            // Prepare the options for the heading type
+            var options = new Array();
+
+            // Prepare the options
+            options[0] = '<option value="1">1</option>';
+            options[1] = '<option value="2">2</option>';
+            options[2] = '<option value="3">3</option>';
+            options[3] = '<option value="4">4</option>';
+
+            // Determine which option should be selected
+            switch (parseInt(items[i]["headingType"]))
+            {
+                case 1:
+                    options[0] = '<option selected="selected" value="1">1</option>';
+                    break;
+                case 2:
+                    options[1] = '<option selected="selected" value="2">2</option>';
+                    break;
+                case 3:
+                    options[2] = '<option selected="selected" value="3">3</option>';
+                    break;
+                case 4:
+                    options[3] = '<option selected="selected" value="4">4</option>';
+                    break;
+                default:
+            }
+
+            // Create the heading
             $("#itemsArea").append(htmlBegin +
-                '<div class="ui labeled input">' +
-                    '<div class="ui label">Heading</div>' +
-                    '<input id="heading-'+ items[i]["itemIndex"] +'" type="text" placeholder="heading" value="'+ items[i]['content'] +'" />' +
-                '</div>' + htmlEnd);
+                '<div class="ui form">' +
+                    '<div class="inline fields">' +
+                        '<label>Heading</label>' +
+                        '<div class="field">' +
+                            '<input id="heading-'+ items[i]["itemIndex"] +'" type="text" placeholder="heading" value="'+ items[i]['content'] +'" />' +
+                        '</div>' +
+                        '<div>' +
+                            '<select id="headingType-'+ items[i]["itemIndex"] +'" class="ui fluid dropdown">' +
+                                options[0] +
+                                options[1] +
+                                options[2] +
+                                options[3] +
+                            '</select>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '' + htmlEnd);
+            $("#headingType-" + items[i]["itemIndex"]).change(function () { saveHeadingType(event); });
             $("#heading-" + items[i]["itemIndex"]).change(function () { saveItemContent(event); });
+
         }
         else if (items[i]['itemType'] == "Section")
         {
