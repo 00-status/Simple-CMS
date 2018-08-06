@@ -29,7 +29,6 @@ $page = new Page(1);
     <div class="ui text container">
         <?= $page->displayContents(); ?>
     </div>
-
 </body>
 </html>
 

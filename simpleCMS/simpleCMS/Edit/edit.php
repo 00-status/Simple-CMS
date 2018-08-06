@@ -34,8 +34,9 @@ if ($_SESSION["validated"] != true)
 
         <!-- Area for adding Items -->
         <div id="addArea" class="ui segment">
-            <button id="addHeading" class="ui black labeled icon button"><i class="plus icon"></i>Add Heading</button>
-            <button id="addSection" class="ui primary labeled icon button"><i class="plus icon"></i>Add Section</button>
+            <button id="addHeading" class="ui black labeled icon button"><i class="heading icon"></i>Add Heading</button>
+            <button id="addSection" class="ui black labeled icon button"><i class="file outline icon"></i>Add Section</button>
+            <button id="addImage" class="ui black labeled icon button"><i class="image icon"></i>Add Image</button>
             <button id="savePage" class="ui green right labeled icon button"><i class="folder open icon"></i>Save</button>
         </div>
 

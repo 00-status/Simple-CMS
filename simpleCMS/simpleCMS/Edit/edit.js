@@ -206,11 +206,49 @@ function addSection()
     // Create a new Section
     var newItem = { pageId: currentPageId, itemIndex: items.length, content: "new Section", itemType: "Section" };
 
-    // Add the section to the end of te items array
+    // Add the section to the end of the items array
     items.push(newItem);
 
     // Display the new item
     displayItems();
+}
+function addImage()
+{
+    // Create a new image Item
+    var newItem = { pageId: currentPageId, itemIndex: items.length, path: "", alt: "", itemType: "Image" };
+
+    // Add the image to the end of the items array
+    items.push(newItem);
+
+    // Display the new item.
+    displayItems();
+}
+function uploadImage(event)
+{
+    // Get the index
+    var itemId = event.target.id;
+    var index = itemId.split("-");
+    index = parseInt(index[1]);
+
+    // Get the file ready for submission
+    var imageInput = document.getElementById("image-" + index);
+    var image = imageInput.files[0];
+    var formdata = new FormData();
+    formdata.append("file", image);
+
+
+    $.ajax({
+        url: 'uploadImage.php',
+        type: 'POST',
+        processData: false,
+        contentType: false,
+        dataType: 'json',
+        data: formdata,
+        success: function (data)
+        {
+            console.log(data);
+        }
+    });
 }
 function saveItemContent(event)
 {
@@ -325,6 +363,20 @@ function displayItems()
 
             $("#section-" + items[i]["itemIndex"]).change(function () { saveItemContent(event); });
         }
+        else if (items[i]['itemType'] == "Image")
+        {
+            $("#itemsArea").append(htmlBegin +
+                '<div class="ui form">' +
+                    '<div class="ui field">' +
+                        '<input type="file" name="imageUpload" id="image-'+ items[i]['itemIndex'] +'">' +
+                    '</div>' +
+                '<input class="ui submit button" type="button" value="Upload Image" id="imageSubmit-' + items[i]['itemIndex'] +'">' +
+                '</form>' + htmlEnd);
+
+            // Set up event listener for the image upload
+            $("#imageSubmit-" + items[i]["itemIndex"]).click(function () { uploadImage(event);} );
+        }
+
 
         // Arrow event Listeners
         $('#up-' + items[i]["itemIndex"]).click(function () { changeIndex(event, true) });
@@ -355,8 +407,10 @@ $(function()
 {
     $("#addHeading").click(addHeading);
     $("#addSection").click(addSection);
+    $("#addImage").click(addImage);
     $("#savePage").click(saveItems);
 });
+
 
 // TEST FUNCTIONS
 function test(event) { alert("HAI :) " + event.target.id); }
