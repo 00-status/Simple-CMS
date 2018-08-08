@@ -27,6 +27,7 @@
     <Compile Include="simpleCMS\Edit\uploadImage.php" />
     <Compile Include="simpleCMS\Login\login.php" />
     <Compile Include="simpleCMS\Pages\Heading.php" />
+    <Compile Include="simpleCMS\Pages\Image.php" />
     <Compile Include="simpleCMS\Pages\Item.php" />
     <Compile Include="simpleCMS\Pages\Page.php" />
     <Compile Include="index.php" />

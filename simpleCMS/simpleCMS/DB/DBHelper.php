@@ -51,8 +51,9 @@ namespace simpleCMS\DB
                 imageId INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 pageId INT NOT NULL,
                 itemIndex INT NOT NULL,
-                path VARCHAR(40) NOT NULL,
-                alt VARCHAR(30) NOT NULL
+                path VARCHAR(47) NOT NULL,
+                alt VARCHAR(30) NOT NULL,
+                name VARCHAR(30) NOT NULL
             )";
             $this->query($query);
 
@@ -175,6 +176,28 @@ namespace simpleCMS\DB
             // Return any entries that we get
             return $returns;
         }
+        function selectImage($imageId)
+        {
+            // Assume that there are no entries that correspond to the given imageId
+            $returns = false;
+
+            // Grab the base Items for the page from PageItem
+            $stmt = $this->prepare("SELECT * FROM Image WHERE imageId='$imageId'");
+            $result = $stmt->execute();
+
+            // Acquire the result
+            $result = $stmt->get_result();
+
+            // If we get back an entry
+            if ($result !== false && $result->num_rows > 0)
+            {
+                // Get the result
+                $returns = $result->fetch_assoc();
+            }
+
+            // Return the image entry
+            return $returns;
+        }
         /**
          * Selects a user from the DB based on a given username
          * If no user is found, then returns false.
@@ -264,6 +287,23 @@ namespace simpleCMS\DB
 
             return $result;
         }
+        function updateImage($pageId, $itemIndex, $alt, $imageId)
+        {
+            // Prepare an update statement
+            $stmt = $this->prepare(
+                "UPDATE `Image` SET `pageId`=?,`itemIndex`=?,`alt`=?
+                    WHERE `imageId`=?");
+
+            // Bind the parameters
+            $result = $stmt->bind_param("iisi", $pageId, $itemIndex, $alt, $imageId);
+            // execute the statement
+            if ($result)
+            {
+                $result = $stmt->execute();
+            }
+
+            return $result;
+        }
         /**
          * Attempts to insert a new Section into the DB. Returns whether or not the statement succeeded.
          * @param mixed $pageId The page the Section belongs to
@@ -309,6 +349,22 @@ namespace simpleCMS\DB
             // Return whether or not the statement succeeded
             return $result;
         }
+        function insertImage($pageId, $itemIndex, $path, $alt,$name)
+        {
+            $result = false;
+
+            $stmt = $this->prepare("INSERT INTO Image (pageId, itemIndex, path, alt, name) VALUES (?,?,?,?,?)");
+            $result = $stmt->bind_param("iisss", $pageId, $itemIndex, $path, $alt, $name);
+
+            // Execute the statement
+            if ($result)
+            {
+                $result = $stmt->execute();
+            }
+
+            // Return whether or not the statement succeeded
+            return $result;
+        }
 
 
 
@@ -344,6 +400,21 @@ namespace simpleCMS\DB
         {
             // Prepare a statment
             $stmt = $this->prepare("DELETE FROM Section WHERE sectionId = ?");
+            $result = $stmt->bind_param("i", $itemId);
+
+            // Execute the statement
+            if ($result)
+            {
+                $result = $stmt->execute();
+            }
+
+            // Return whether or not the statement succeeded
+            return $result;
+        }
+        function deleteImage($itemId)
+        {
+            // Prepare a statment
+            $stmt = $this->prepare("DELETE FROM Image WHERE imageId = ?");
             $result = $stmt->bind_param("i", $itemId);
 
             // Execute the statement

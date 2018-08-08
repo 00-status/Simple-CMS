@@ -11,11 +11,10 @@ spl_autoload_register(function($class)
 $inf = new DBInfo();
 $db = new DBHelper($inf->host(),$inf->username(),$inf->pass(),$inf->dbName(),$inf->port());
 
-$db->selectItems("Section\\",1);
+$db->query("DROP TABLE Image");
 
 $db->close();
 $db = null;
 
-
-echo "Result: " + $result;
+echo "Result: " . $result["path"];
 ?>

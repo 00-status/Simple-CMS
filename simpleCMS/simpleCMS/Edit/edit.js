@@ -71,9 +71,21 @@ function saveItems()
 {
     var saveUrl = "savePage.php";
 
-    // If the items array has stuff in it, then Save the current page's items
+    // If the items array has stuff in it, then save the current page's items
     if (items.length > 0)
     {
+        // Remove any Image items without paths
+        for (var i = 0; i < items.length; i++)
+        {
+            if (items[i].hasOwnProperty("path"))
+            {
+                if (items[i]["path"] === null)
+                {
+                    reblanceItems(index);
+                }
+            }
+        }
+
         $.ajax({
             url: saveUrl,
             type: "POST",
@@ -152,16 +164,14 @@ function changeIndex(event, up)
 }
 function deleteItem(event)
 {
-    var succeeded = false;
     var delUrl = "delPage.php";
 
     var index = event.target.id;
     index = index.split("-");
     index = parseInt(index[1]);
-
    
-
-    if (typeof items[index]["sectionId"] !== 'undefined' || typeof items[index]["headingId"] !== 'undefined' )
+    if (typeof items[index]["imageId"] !== 'undefined' || typeof items[index]["sectionId"] !== 'undefined' ||
+        typeof items[index]["headingId"] !== 'undefined')
     {
         // Delete the item from the db
         $.ajax({
@@ -171,24 +181,25 @@ function deleteItem(event)
             data: JSON.stringify(items[index]),
             success: function (jsonData)
             {
-                succeeded = true;
                 saveItems();
             }
         });
     }
 
+    reblanceItems(index);
+
+    // display the items
+    displayItems();
+}
+function reblanceItems(index)
+{
     // Delete the item at the given index
     items.splice(index, 1);
 
     // change the itemIndex of each element located after the one just deleted.
-    for (var i = index; i < items.length; i++)
-    {
+    for (var i = index; i < items.length; i++) {
         items[i]["itemIndex"] = i;
     }
-    // display the items
-    displayItems();
-
-    return succeeded();
 }
 function addHeading()
 {
@@ -215,7 +226,7 @@ function addSection()
 function addImage()
 {
     // Create a new image Item
-    var newItem = { pageId: currentPageId, itemIndex: items.length, path: "", alt: "", itemType: "Image" };
+    var newItem = { pageId: currentPageId, itemIndex: items.length, path: null, alt: "image", name: "", itemType: "Image" };
 
     // Add the image to the end of the items array
     items.push(newItem);
@@ -229,6 +240,9 @@ function uploadImage(event)
     var itemId = event.target.id;
     var index = itemId.split("-");
     index = parseInt(index[1]);
+
+    // Get the relavent item for later
+    var currentItem = items[index];
 
     // Get the file ready for submission
     var imageInput = document.getElementById("image-" + index);
@@ -246,7 +260,27 @@ function uploadImage(event)
         data: formdata,
         success: function (data)
         {
-            console.log(data);
+            // Check if the upload was successful
+            if (data["successPath"] != null)
+            {
+                // Set the path of the image item
+                currentItem.path = data["successPath"];
+                // Set the name of the image
+                currentItem.name = data["successName"];
+                // Save the new image
+                saveItems();
+                // Display the image
+                displayItems();
+            }
+            else if (data["error"] != null)
+            {
+                // Create an error message
+                var errorhtml = '<div class="ui negative message"><p>'+ data["error"] +'</p></div>';
+                $("#imageError-" + index).html(errorhtml);
+
+                // Display the error message
+                $("#imageError-" + index).removeClass("hidden");
+            }
         }
     });
 }
@@ -265,6 +299,7 @@ function saveHeadingType(event)
     var index = itemId.split("-");
     index = parseInt(index[1]);
 
+    // Set the heading type
     items[index]["headingType"] = $("#" + itemId).val();
 }
 
@@ -365,16 +400,26 @@ function displayItems()
         }
         else if (items[i]['itemType'] == "Image")
         {
-            $("#itemsArea").append(htmlBegin +
-                '<div class="ui form">' +
-                    '<div class="ui field">' +
-                        '<input type="file" name="imageUpload" id="image-'+ items[i]['itemIndex'] +'">' +
-                    '</div>' +
-                '<input class="ui submit button" type="button" value="Upload Image" id="imageSubmit-' + items[i]['itemIndex'] +'">' +
-                '</form>' + htmlEnd);
-
-            // Set up event listener for the image upload
-            $("#imageSubmit-" + items[i]["itemIndex"]).click(function () { uploadImage(event);} );
+            // Check if the path is set
+            if (items[i]['path'] == null)
+            {
+                // Display an upload form
+                $("#itemsArea").append(htmlBegin +
+                    '<div class="ui form">' +
+                        '<div id="imageError-' + items[i]["itemIndex"] + '"></div>' +
+                        '<div class="ui field">' +
+                            '<input type="file" name="imageUpload" id="image-'+ items[i]['itemIndex'] +'">' +
+                        '</div>' +
+                    '<input class="ui submit button" type="button" value="Upload Image" id="imageSubmit-' + items[i]['itemIndex'] +'">' +
+                    '</div>' + htmlEnd);
+                // Set up event listener for the image upload
+                $("#imageSubmit-" + items[i]["itemIndex"]).click(function () { uploadImage(event);} );
+            }
+            else // The path is set
+            {
+                // Display an image 
+                $("#itemsArea").append(htmlBegin + '<img src="'+ items[i]["path"] +'" class="ui huge image">' + htmlEnd);
+            }
         }
 
 

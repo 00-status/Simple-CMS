@@ -5,8 +5,6 @@ namespace simpleCMS\Pages
 	/**
      * Holds the heading information for a page
 	 *
-	 * @version 1.0
-	 * @author Liam
 	 */
 	class Heading extends Item
 	{

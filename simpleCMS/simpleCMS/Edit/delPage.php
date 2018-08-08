@@ -22,7 +22,7 @@ if ($_SESSION["validated"] != true)
 
 $contentType = null;
 
-// Check is the content type is set
+// Check if the content type is set
 if (isset($_SERVER["CONTENT_TYPE"]))
 {
 	$contentType = $_SERVER["CONTENT_TYPE"];
@@ -38,7 +38,6 @@ if ($contentType !== "application/json")
 // Get the data from php://input
 $data = trim(file_get_contents("php://input"));
 $data = json_decode($data, true);
-
 
 if ( !(isset($data)) )
 {
@@ -56,13 +55,24 @@ switch ($data["itemType"])
 {
     case "Heading":
         $success = $db->deleteHeading($data["headingId"]);
-
         break;
     case "Section":
-        $success = $db->deleteHeading($data["sectionId"]);
+        $success = $db->deleteSection($data["sectionId"]);
+        break;
+    case "Image":
+        // Retrieve the image path directly from the DB
+        $dbImage = $db->selectImage($data["imageId"]);
+        // Delete the image from the server
+        unlink("../Images/" . $dbImage["name"]);
+
+        // Delete the image entry from the database
+        $success = $db->deleteImage($data["imageId"]);
         break;
 	default:
 }
+
+$db->close();
+$db = null;
 
 echo json_encode(array("success"=>$success));
 

@@ -67,11 +67,21 @@ foreach ($data as $item)
         case "Heading":
             if (isset($item["headingId"]))
             {
-                $success = $db->updateHeading($item["pageId"],$item["itemIndex"],$item["content"], $item["headingType"], $item["headingId"]);
+                $success = $db->updateHeading($item["pageId"], $item["itemIndex"], $item["content"], $item["headingType"], $item["headingId"]);
             }
             else
             {
-                $success = $db->insertHeading($item["pageId"],$item["itemIndex"],$item["content"], $item["headingType"]);
+                $success = $db->insertHeading($item["pageId"], $item["itemIndex"], $item["content"], $item["headingType"]);
+            }
+            break;
+        case "Image":
+            if (isset($item["imageId"]))
+            {
+                $success = $db->updateImage($item["pageId"], $item["itemIndex"], $item["alt"], $item["imageId"]);
+            }
+            else
+            {
+                $success = $db->insertImage($item["pageId"], $item["itemIndex"], $item["path"], $item["alt"], $item["name"]);
             }
             break;
     	default:

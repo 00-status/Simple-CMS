@@ -96,6 +96,18 @@ else if ($data["data"] === "items")
         array_push($returnedRows, $rows);
     }
 
+    // Ask the DB for all Images related to this page
+    $rows = $db->selectItems("Image", $pageId);
+
+    if ($rows !== false)
+    {
+        for ($i = 0; $i < count($rows); $i++)
+        {
+            $rows[$i]["itemType"] = "Image";
+        }
+        array_push($returnedRows, $rows);
+    }
+
 
     // Close the db
     $db->close();

@@ -57,6 +57,11 @@ namespace simpleCMS\Pages
             // Push a new Heading onto the end of the array
             $this->items["$index"] = new Heading($index, $headingType, $content);
         }
+        public function addImage($index, $path, $alt)
+        {
+            // Push a new Heading onto the end of the array
+            $this->items["$index"] = new Image($index, $path, $alt);
+        }
 
         public function removeItem($index)
         {
@@ -121,6 +126,15 @@ namespace simpleCMS\Pages
                 foreach ($headings as $heading)
                 {
                     $this->addHeading($heading["itemIndex"], $heading["headingType"], $heading["content"]);
+                }
+            }
+            // Images
+            $images = $db->selectItems("Image", $pageId);
+            if ($images != false && !empty($images))
+            {
+                foreach ($images as $image)
+                {
+                    $this->addImage($image["itemIndex"], $image["path"], $image["alt"]);
                 }
             }
 
