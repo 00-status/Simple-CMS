@@ -18,6 +18,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="dbTemp.php" />
+    <Compile Include="example.php" />
     <Compile Include="simpleCMS\DB\DBHelper.php" />
     <Compile Include="simpleCMS\DB\DBInfo.php" />
     <Compile Include="simpleCMS\Edit\delPage.php" />

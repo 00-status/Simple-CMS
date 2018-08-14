@@ -51,9 +51,9 @@ namespace simpleCMS\DB
                 imageId INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 pageId INT NOT NULL,
                 itemIndex INT NOT NULL,
-                path VARCHAR(47) NOT NULL,
+                path VARCHAR(100) NOT NULL,
                 alt VARCHAR(30) NOT NULL,
-                name VARCHAR(30) NOT NULL
+                name VARCHAR(50) NOT NULL
             )";
             $this->query($query);
 
@@ -75,6 +75,36 @@ namespace simpleCMS\DB
             $this->query($query);
         }
 
+        public function pageExists($pageId)
+        {
+            // Prepare a sql statement
+            $stmt = $this->prepare("SELECT * FROM Page WHERE pageId=?");
+            $result = $stmt->bind_param("i", $pageId);
+
+            if ($result)
+            {
+            	$result = $stmt->execute();
+            }
+
+            if ($result)
+            {
+                // Get the result of the query
+                $result = $stmt->get_result();
+
+                // If the number of returned rows is greater than one, then the page exists
+                if ($result->num_rows > 0)
+                {
+                    $result = true;
+                }
+                else
+                {
+                    $result = false;
+                }
+            }
+
+            // return whether or not the page exists
+            return $result;
+        }
 
 
         // SELECT FUNCTIONS
@@ -234,7 +264,7 @@ namespace simpleCMS\DB
 
 
 
-        // INSERT AND UPDATE
+        // UPDATE FUNCTIONS
         /**
          * Updates a section in the DB. Returns whether or not the statement succeeded
          * @param mixed $pageId The page the section belongs to
@@ -302,6 +332,23 @@ namespace simpleCMS\DB
                 $result = $stmt->execute();
             }
 
+            return $result;
+        }
+
+
+
+
+        // INSERT FUNCTIONS
+        public function insertPage($pageId)
+        {
+            $title = "Page " . $pageId;
+            $stmt = $this->prepare('INSERT INTO Page (pageId, title) VALUES(?,?)');
+            $result = $stmt->bind_param("is", $pageId, $title);
+
+            if ($result)
+            {
+            	$result = $stmt->execute();
+            }
             return $result;
         }
         /**

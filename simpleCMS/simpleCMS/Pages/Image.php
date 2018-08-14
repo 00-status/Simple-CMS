@@ -38,12 +38,27 @@ namespace simpleCMS\Pages
          * Returns an html img tag with the appropriate attributes
          * @return string
          */
-        public function display()
+        public function display($semanticUI)
         {
-            return <<<ET
+            $returns = "";
+
+            if ($semanticUI)
+            {
+            	$returns = <<<ET
+
+    <div class="ui basic segment">
+        <img class="ui rounded image" alt="$this->alt" src="$this->path" />
+    </div>
+ET;
+            }
+            else
+            {
+                $returns =             <<<ET
 
         <img align="middle" alt="$this->alt" src="$this->path" />
 ET;
+            }
+            return $returns;
         }
     }
 }

@@ -90,5 +90,6 @@ foreach ($data as $item)
 
 // Close the db
 $db->close();
+$db = null;
 
 echo json_encode(array("success"=>$success));

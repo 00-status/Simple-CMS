@@ -5,8 +5,6 @@ namespace simpleCMS\Pages
 	/**
 	 * Holds the content and index of a single paragraph on a page
 	 *
-	 * @version 1.0
-	 * @author Liam
 	 */
 	class Section extends Item
 	{
@@ -25,7 +23,7 @@ namespace simpleCMS\Pages
         {
             return $this->index;
         }
-        public function display()
+        public function display($semanticUI)
         {
             // The html that will be returned
             $html = "";
@@ -36,7 +34,10 @@ namespace simpleCMS\Pages
             // Add each individual paragraph to the html
             foreach ($section as $paragraph)
             {
-            	$html .= "<p>$paragraph</p>";
+                $html .= <<<ET
+
+    <p>$paragraph</p>
+ET;
             }
 
 

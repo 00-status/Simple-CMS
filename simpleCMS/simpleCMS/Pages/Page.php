@@ -11,17 +11,17 @@ namespace simpleCMS\Pages
         require_once '..\\..\\' . $class . '.php';
     });
 	/**
-	 * Page short summary.
-	 *
-	 * Page description.
-	 *
-	 * @version 1.0
-	 * @author Liam
+	 * Holds and displays information relating to a page,
+     * such as headings images and sections.
 	 */
 	class Page
 	{
-
-        public $title = null;
+        /**
+         * indicates whether or not to use the SemanticUI Framework. Defaults to false
+         * @var bool
+         */
+        private $semanticUI;
+        public $title = "";
 
         /**
          * An array of items on the page
@@ -30,16 +30,29 @@ namespace simpleCMS\Pages
         private $items = array();
 
         /**
-         * Optionally takes in the title of the page as well as the current
-         * count of how many items are on the page
-         * @param mixed $title The main title of the page
-         * @param mixed $itemCount The number of items on the page
+         * Takes in the pageId and whether or not to use the semantic ui framework.
+         * Retrieves the page information and prepares for display
+         * @param mixed $pageId the id of the page to be displayed
+         * @param mixed $semanticUI indicates whether or not to use the semantic ui framework
          */
-        function __construct($pageId)
+        function __construct($pageId, $semanticUI=false)
         {
-            // Get the specified page from the db
-            $this->getPage($pageId);
+            $this->semanticUI = $semanticUI;
 
+            // Check if this pageId is already in the Database
+            $inf = new DBInfo();
+            $db = new DBHelper($inf->host(),$inf->username(),$inf->pass(),$inf->dbName(),$inf->port());
+            $exists = $db->pageExists($pageId);
+
+            if ($exists)
+            {
+                // Load the specified page from the db
+                $this->getPage($pageId);
+            }
+            else
+            {
+                $db->insertPage($pageId);
+            }
         }
 
         /**
@@ -47,23 +60,23 @@ namespace simpleCMS\Pages
          * @param mixed $index the index of the section on the page
          * @param mixed $content the text of the section
          */
-        public function addSection($index, $content)
+        private function addSection($index, $content)
         {
             // Push a new Section onto the end of the array
             $this->items["$index"] = new Section($index, $content);
         }
-        public function addHeading($index, $headingType, $content)
+        private function addHeading($index, $headingType, $content)
         {
             // Push a new Heading onto the end of the array
             $this->items["$index"] = new Heading($index, $headingType, $content);
         }
-        public function addImage($index, $path, $alt)
+        private function addImage($index, $path, $alt)
         {
             // Push a new Heading onto the end of the array
             $this->items["$index"] = new Image($index, $path, $alt);
         }
 
-        public function removeItem($index)
+        private function removeItem($index)
         {
             // Attempt to find the requested index
             if (array_key_exists($index, $this->items))
@@ -78,24 +91,66 @@ namespace simpleCMS\Pages
                 }
             }
         }
+
+        // DISPLAY FUNCTIONS
         /**
-         * Puts the sections, headings and widgets for this page into a string
+         * Displays header meta information like the page title
+         * If semantic ui is enabled then jQuery and semantic ui will be imported
+         * @return string Returns the header html
+         */
+        public function headingHtml()
+        {
+            $html = "<title>$this->title</title>";
+            if ($this->semanticUI)
+            {
+            	$html .= <<<ET
+
+    <!-- Import semantic ui and jquery -->
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.1/semantic.min.css" />
+    <!-- Import JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!-- Import Semantic JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.1/semantic.min.js"></script>
+ET;
+            }
+
+            return $html;
+        }
+        /**
+         * Puts the sections, headings and widgets for this page into an html string
          * @return string returns the formatted html
          */
         public function displayContents()
         {
-            $html = "<div>";
+            // If semantic is enabled, then add some classes to the overarching div
+            if ($this->semanticUI)
+            {
+                $html = <<<ET
+
+    <div class="ui text container">
+ET;
+            } else {
+                $html = <<<ET
+
+    "<div>"
+ET;
+            }
 
             foreach ($this->items as $section)
             {
-            	$html .= $section->display();
+            	$html .= $section->display($this->semanticUI);
             }
 
-            $html .= "</div>";
+            $html .= <<<ET
+
+    </div>
+ET;
             return $html;
         }
 
 
+
+        // DB FUNCTIONS
         private function getPage($pageId)
         {
             $inf = new DBInfo();
@@ -140,6 +195,7 @@ namespace simpleCMS\Pages
 
             // Close the db
             $db->close();
+            $db = null;
 
             // Sort the items for the page
             if (!empty($this->items))

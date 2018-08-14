@@ -24,9 +24,9 @@ function getPages()
             displayPages(jsonData);
         });
 }
-function getItems(event)
+function getItems(pageId)
 {
-    currentPageId = event.target.id;
+    currentPageId = pageId;
     // Retrieve headings
     var data = { data: "items", pageId: currentPageId };
 
@@ -92,6 +92,8 @@ function saveItems()
             contentType: 'application/json',
             data: JSON.stringify(items),
             success: function (jsonData) {
+                // Retrieve the items, so any items that just got an id are updated
+                getItems(currentPageId);
             }
         });
     }
@@ -269,8 +271,6 @@ function uploadImage(event)
                 currentItem.name = data["successName"];
                 // Save the new image
                 saveItems();
-                // Display the image
-                displayItems();
             }
             else if (data["error"] != null)
             {
@@ -442,7 +442,7 @@ function displayPages(jsonData)
             '<button id="' + jsonData[i]["pageId"] + '" class="ui teal button">' + jsonData[i]["title"] + '</button>');
 
         // Set up an event listener for the new button
-        $("#" + jsonData[i]["pageId"]).click(function () { getItems(event); });
+        $("#" + jsonData[i]["pageId"]).click(function () { getItems(event.target.id); });
     }  
 }
 

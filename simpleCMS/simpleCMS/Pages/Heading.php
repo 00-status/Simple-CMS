@@ -39,14 +39,16 @@ namespace simpleCMS\Pages
          * Returns an html header tag with the appropriate attributes
          * @return string
          */
-        public function display()
+        public function display($semanticUI)
         {
-            return <<<ET
+            $returns = "";
 
-        <h$this->type> $this->content </h$this->type>
+            $returns = <<<ET
+
+    <h$this->type> $this->content </h$this->type>
 ET;
+
+            return $returns;
         }
-
-
 	}
 }
